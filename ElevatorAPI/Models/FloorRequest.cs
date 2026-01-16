@@ -19,7 +19,7 @@ public class FloorRequest
 
     public FloorRequest(int floor, Direction direction, Origin origin)
     {
-        Floor = floor; // The floor number being requested. For an external request this will be the same as the target floor.
+        Floor = floor; // The destination floor associated with this request. For external requests, this is the caller's current floor (where the hall button was pressed).
         Direction = direction; // The direction of the request (Up or Down)
         Origin = origin; // The origin of the request (Internal or External)
     }
