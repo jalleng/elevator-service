@@ -1,13 +1,16 @@
+using ElevatorAPI.Services;
+
 namespace ElevatorAPI.Routes;
 
 public static class FloorRequestEndpoints
 {
     public static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/", async context =>
+        group.MapGet("/", async (FloorRequestService service) =>
         {
             // Get all floor requests
-            await context.Response.WriteAsJsonAsync(new { Message = "All floor requests" });
+            var requests = service.GetAllRequests();
+            return Results.Ok(requests);
         });
 
         group.MapGet("/internal", async context =>
