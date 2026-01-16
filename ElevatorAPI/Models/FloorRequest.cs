@@ -1,3 +1,5 @@
+namespace ElevatorAPI.Models;
+
 public enum Direction
 {
     Up, // For external requests with the up button selected.

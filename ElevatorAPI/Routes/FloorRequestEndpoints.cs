@@ -35,7 +35,7 @@ public static class FloorRequestEndpoints
             await context.Response.WriteAsJsonAsync(new { Message = $"Floor request {id} deleted" });
         });
 
-        group.MapDelete("/clear", async context =>
+        group.MapPost("/clear", async context =>
         {
             // Clear all floor requests
             await context.Response.WriteAsJsonAsync(new { Message = "All floor requests cleared" });
