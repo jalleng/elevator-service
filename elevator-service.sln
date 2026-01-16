@@ -2,23 +2,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorService", "ElevatorService\ElevatorService.csproj", "{F11318EB-4511-0F12-319A-F181B9A01C05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorAPI", "ElevatorAPI\ElevatorAPI.csproj", "{F11318EB-4511-0F12-319A-F181B9A01C05}"
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F11318EB-4511-0F12-319A-F181B9A01C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F11318EB-4511-0F12-319A-F181B9A01C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F11318EB-4511-0F12-319A-F181B9A01C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F11318EB-4511-0F12-319A-F181B9A01C05}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {E19801D7-293D-459A-B42A-39812C539885}
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {F11318EB-4511-0F12-319A-F181B9A01C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {F11318EB-4511-0F12-319A-F181B9A01C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {F11318EB-4511-0F12-319A-F181B9A01C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {F11318EB-4511-0F12-319A-F181B9A01C05}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(ExtensibilityGlobals) = postSolution
+        SolutionGuid = {E19801D7-293D-459A-B42A-39812C539885}
+    EndGlobalSection
 EndGlobal
