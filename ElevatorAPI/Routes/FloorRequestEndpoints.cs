@@ -16,7 +16,7 @@ public static class FloorRequestEndpoints
             await context.Response.WriteAsJsonAsync(new { Message = "All internal floor requests" });
         });
 
-        group.MapGet("/nextfloor", async context =>
+        group.MapGet("/next", async context =>
         {
             // Get the next floor to service
             await context.Response.WriteAsJsonAsync(new { Message = "Next floor to service" });
