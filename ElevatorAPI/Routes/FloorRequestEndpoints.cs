@@ -22,6 +22,7 @@ public static class FloorRequestEndpoints
         group.MapGet("/next", async context =>
         {
             // Get the next floor to service
+            // Note: This should also remove the current floor being serviced from the request list
             await context.Response.WriteAsJsonAsync(new { Message = "Next floor to service" });
         });
 

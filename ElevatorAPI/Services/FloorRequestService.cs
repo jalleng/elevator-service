@@ -135,7 +135,7 @@ public class FloorRequestService
         _currentDirection = Direction.Up;
     }
 
-    public void ServiceCurrentFloor()
+    public void ServiceCurrentFloor() // Removes the current floor being serviced. Called after the elevator has arrived at that floor and is requesting the next floor.
     {
         if (_currentNode != null)
         {
