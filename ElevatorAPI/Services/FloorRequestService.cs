@@ -7,33 +7,84 @@ public class FloorRequestService
     private readonly LinkedList<FloorRequest> _requests = new();
     private LinkedListNode<FloorRequest>? _currentNode;
     private Direction _currentDirection = Direction.Up;
+    private readonly object _lock = new object(); // Lock object for thread safety
 
     public IEnumerable<FloorRequest> GetAllRequests()
     {
-        return _requests;
+        lock (_lock)
+        {
+            return _requests.ToList(); // Return a copy to avoid enumeration issues
+        }
     }
 
     public IEnumerable<FloorRequest> GetInternalRequests()
     {
-        return _requests.Where(r => r.Origin == Origin.Internal);
+        lock (_lock)
+        {
+            return _requests.Where(r => r.Origin == Origin.Internal).ToList();
+        }
     }
 
-    public Direction CurrentDirection => _currentDirection;
+    public Direction CurrentDirection
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _currentDirection;
+            }
+        }
+    }
 
     public FloorRequest? GetNextStop()
     {
-        if (_currentNode == null && _requests.Count > 0)
+        lock (_lock)
         {
-            _currentNode = _requests.First;
-            _currentDirection = Direction.Up;
-            return _currentNode?.Value;
-        }
+            if (_currentNode == null && _requests.Count > 0)
+            {
+                _currentNode = _requests.First;
+                _currentDirection = Direction.Up;
+                return _currentNode?.Value;
+            }
 
+            var nextNode = (_currentDirection == Direction.Up)
+                           ? _currentNode?.Next
+                           : _currentNode?.Previous;
+
+            // If hit the end, reverse direction and try again
+            if (nextNode == null && _requests.Count > 0)
+            {
+                _currentDirection = (_currentDirection == Direction.Up) ? Direction.Down : Direction.Up;
+                nextNode = (_currentDirection == Direction.Up)
+                           ? _currentNode?.Next
+                           : _currentNode?.Previous;
+            }
+
+            if (nextNode == null) return null;
+
+            FloorRequest request = nextNode.Value;
+
+            if (request.Origin == Origin.Internal ||
+                request.Direction == _currentDirection ||
+                request.Direction == Direction.Both)
+            {
+                _currentNode = nextNode;
+                return request;
+            }
+
+            // Skip this floor (wrong direction) - recursively check next
+            _currentNode = nextNode;
+            return GetNextStopInternal(); // Use internal method to avoid re-locking
+        }
+    }
+
+    private FloorRequest? GetNextStopInternal()
+    {
+        // Assumes lock is already held - no lock statement here
         var nextNode = (_currentDirection == Direction.Up)
                        ? _currentNode?.Next
                        : _currentNode?.Previous;
 
-        // If hit the end, reverse direction and try again
         if (nextNode == null && _requests.Count > 0)
         {
             _currentDirection = (_currentDirection == Direction.Up) ? Direction.Down : Direction.Up;
@@ -42,14 +93,10 @@ public class FloorRequestService
                        : _currentNode?.Previous;
         }
 
-        if (nextNode == null) return null; // No more floors in either direction
+        if (nextNode == null) return null;
 
         FloorRequest request = nextNode.Value;
 
-        // Stop if:
-        // 1. Requested from inside (must stop)
-        // 2. Requested from outside and direction matches
-        // 3. Direction is Both
         if (request.Origin == Origin.Internal ||
             request.Direction == _currentDirection ||
             request.Direction == Direction.Both)
@@ -58,90 +105,93 @@ public class FloorRequestService
             return request;
         }
 
-        // Skip this floor (wrong direction) - recursively check next
         _currentNode = nextNode;
-        return GetNextStop();
+        return GetNextStopInternal();
     }
 
     public void AddRequest(FloorRequest request)
     {
-        if (_requests.Count == 0)
+        lock (_lock)
         {
-            _requests.AddFirst(request);
-            return;
-        }
-
-        // Find correct position to keep sorted by floor number
-        var current = _requests.First;
-        while (current != null && current.Value.Floor < request.Floor)
-        {
-            current = current.Next;
-        }
-
-        if (current == null)
-        {
-            // Highest floor requested
-            _requests.AddLast(request);
-        }
-        else if (current.Value.Floor == request.Floor)
-        {
-            // Floor already exists - merge the requests
-            var existing = current.Value;
-
-            // If either is Internal, the merged request must be Internal
-            if (request.Origin == Origin.Internal || existing.Origin == Origin.Internal)
+            if (_requests.Count == 0)
             {
-                existing.Origin = Origin.Internal;
+                _requests.AddFirst(request);
+                return;
             }
 
-            // Merge directions
-            if (existing.Direction != request.Direction)
+            var current = _requests.First;
+            while (current != null && current.Value.Floor < request.Floor)
             {
-                // Different directions requested for same floor = Both
-                existing.Direction = Direction.Both;
+                current = current.Next;
             }
-            // If same direction or already Both, no change needed
-        }
-        else
-        {
-            // Insert in middle (floor doesn't exist yet)
-            _requests.AddBefore(current, request);
+
+            if (current == null)
+            {
+                _requests.AddLast(request);
+            }
+            else if (current.Value.Floor == request.Floor)
+            {
+                var existing = current.Value;
+
+                if (request.Origin == Origin.Internal || existing.Origin == Origin.Internal)
+                {
+                    existing.Origin = Origin.Internal;
+                }
+
+                if (existing.Direction != request.Direction)
+                {
+                    existing.Direction = Direction.Both;
+                }
+            }
+            else
+            {
+                _requests.AddBefore(current, request);
+            }
         }
     }
 
     public bool RemoveRequest(int floor)
     {
-        var node = _requests.First;
-        while (node != null)
+        lock (_lock)
         {
-            if (node.Value.Floor == floor)
+            var node = _requests.First;
+            while (node != null)
             {
-                if (_currentNode == node)
+                if (node.Value.Floor == floor)
                 {
-                    _currentNode = node.Next ?? node.Previous;
+                    if (_currentNode == node)
+                    {
+                        _currentNode = node.Next ?? node.Previous;
+                    }
+                    _requests.Remove(node);
+                    return true;
                 }
-                _requests.Remove(node);
-                return true;
+                node = node.Next;
             }
-            node = node.Next;
+            return false;
         }
-        return false;
     }
 
     public void ClearAllRequests()
     {
-        _requests.Clear();
-        _currentNode = null;
-        _currentDirection = Direction.Up;
+        lock (_lock)
+        {
+            _requests.Clear();
+            _currentNode = null;
+            _currentDirection = Direction.Up;
+        }
     }
 
-    public void ServiceCurrentFloor() // Removes the current floor being serviced. Called after the elevator has arrived at that floor and is requesting the next floor.
+    public void ServiceCurrentFloor()
     {
-        if (_currentNode != null)
+        lock (_lock)
         {
-            var nodeToRemove = _currentNode;
-            _currentNode = _currentNode.Next ?? _currentNode.Previous;
-            _requests.Remove(nodeToRemove);
+            if (_currentNode != null)
+            {
+                var nodeToRemove = _currentNode;
+                _currentNode = _currentNode.Next ?? _currentNode.Previous;
+                _requests.Remove(nodeToRemove);
+            }
         }
     }
 }
