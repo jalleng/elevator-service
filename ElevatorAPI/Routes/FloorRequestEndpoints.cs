@@ -8,14 +8,14 @@ public static class FloorRequestEndpoints
 {
   public static void Map(RouteGroupBuilder group)
   {
-    group.MapGet("/", (FloorRequestService service) =>
+    group.MapGet("/", IResult (FloorRequestService service) =>
     {
       // Get all floor requests
       var requests = service.GetAllRequests();
       return TypedResults.Ok(requests);
     });
 
-    group.MapGet("/internal", (FloorRequestService service) =>
+    group.MapGet("/internal", IResult (FloorRequestService service) =>
     {
       // Get all internal floor requests
       var requests = service.GetInternalRequests();
@@ -48,19 +48,19 @@ public static class FloorRequestEndpoints
 
       // Create a new floor request
       service.AddRequest(request);
-      return TypedResults.Created($"/{request.Floor}", request);
+      return TypedResults.Created($"/floorrequests/{request.Floor}", request);
     });
 
-    group.MapDelete("/{id}", IResult (FloorRequestService service, int id) =>
+    group.MapDelete("/{floor}", IResult (FloorRequestService service, int floor) =>
     {
-      // Delete a floor request by ID / Floor Number
-      var success = service.RemoveRequest(id);
+      // Delete a floor request Floor Number
+      var success = service.RemoveRequest(floor);
       return success
         ? TypedResults.NoContent()
         : TypedResults.NotFound();
     });
 
-    group.MapPost("/clear", (FloorRequestService service) =>
+    group.MapPost("/clear", IResult (FloorRequestService service) =>
     {
       // Clear all floor requests
       service.ClearAllRequests();

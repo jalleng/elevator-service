@@ -175,6 +175,34 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
   }
 
   [Fact]
+  public async Task PostFloorRequest_MaxRange_ReturnsCreated()
+  {
+    // Arrange
+    await ClearAllRequests();
+    var request = new FloorRequest(TestMaxFloor, Direction.Down, Origin.Internal);
+
+    // Act
+    var response = await _client.PostAsJsonAsync("/floorrequests", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+  }
+
+  [Fact]
+  public async Task PostFloorRequest_MinRange_ReturnsCreated()
+  {
+    // Arrange
+    await ClearAllRequests();
+    var request = new FloorRequest(TestMinFloor, Direction.Up, Origin.External);
+
+    // Act
+    var response = await _client.PostAsJsonAsync("/floorrequests", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+  }
+
+  [Fact]
   public async Task DeleteFloorRequest_ExistingFloor_ReturnsNoContent()
   {
     // Arrange
