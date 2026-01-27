@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ElevatorAPI.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +12,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 {
   private readonly WebApplicationFactory<Program> _factory;
   private readonly HttpClient _client;
+  private readonly JsonSerializerOptions _jsonOptions;
   private const int TestMinFloor = 1;
   private const int TestMaxFloor = 100;
 
@@ -27,6 +30,13 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
       });
     });
     _client = _factory.CreateClient();
+
+    // Configure JSON options to match the app (string enums)
+    _jsonOptions = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true,
+      Converters = { new JsonStringEnumConverter() }
+    };
   }
 
   [Fact]
@@ -40,7 +50,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>();
+    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>(_jsonOptions);
     Assert.NotNull(requests);
     Assert.Empty(requests);
   }
@@ -60,7 +70,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>();
+    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>(_jsonOptions);
     Assert.NotNull(requests);
     Assert.Equal(2, requests.Length);
   }
@@ -79,7 +89,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>();
+    var requests = await response.Content.ReadFromJsonAsync<FloorRequest[]>(_jsonOptions);
     Assert.NotNull(requests);
     Assert.Equal(2, requests.Length);
     Assert.All(requests, r => Assert.Equal(Origin.Internal, r.Origin));
@@ -110,7 +120,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    var nextStop = await response.Content.ReadFromJsonAsync<FloorRequest>();
+    var nextStop = await response.Content.ReadFromJsonAsync<FloorRequest>(_jsonOptions);
     Assert.NotNull(nextStop);
     Assert.Equal(5, nextStop.Floor);
   }
@@ -127,7 +137,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Assert
     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    var createdRequest = await response.Content.ReadFromJsonAsync<FloorRequest>();
+    var createdRequest = await response.Content.ReadFromJsonAsync<FloorRequest>(_jsonOptions);
     Assert.NotNull(createdRequest);
     Assert.Equal(8, createdRequest.Floor);
     Assert.Equal(Direction.Up, createdRequest.Direction);
@@ -244,7 +254,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Verify all cleared
     var getResponse = await _client.GetAsync("/floorrequests");
-    var requests = await getResponse.Content.ReadFromJsonAsync<FloorRequest[]>();
+    var requests = await getResponse.Content.ReadFromJsonAsync<FloorRequest[]>(_jsonOptions);
     Assert.NotNull(requests);
     Assert.Empty(requests);
   }
@@ -281,7 +291,7 @@ public class FloorRequestEndpointsTests : IClassFixture<WebApplicationFactory<Pr
 
     // Verify the request for floor 3 is removed
     var getResponse = await _client.GetAsync("/floorrequests");
-    var requests = await getResponse.Content.ReadFromJsonAsync<FloorRequest[]>();
+    var requests = await getResponse.Content.ReadFromJsonAsync<FloorRequest[]>(_jsonOptions);
     Assert.NotNull(requests);
     Assert.DoesNotContain(requests, r => r.Floor == 3);
   }
