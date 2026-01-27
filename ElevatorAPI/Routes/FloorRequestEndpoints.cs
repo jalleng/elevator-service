@@ -1,4 +1,6 @@
+using ElevatorAPI.Models;
 using ElevatorAPI.Services;
+using Microsoft.Extensions.Options;
 
 namespace ElevatorAPI.Routes;
 
@@ -6,43 +8,70 @@ public static class FloorRequestEndpoints
 {
   public static void Map(RouteGroupBuilder group)
   {
-    group.MapGet("/", async (FloorRequestService service) =>
+    group.MapGet("/", IResult (FloorRequestService service) =>
     {
       // Get all floor requests
       var requests = service.GetAllRequests();
-      return Results.Ok(requests);
+      return TypedResults.Ok(requests);
     });
 
-    group.MapGet("/internal", async context =>
+    group.MapGet("/internal", IResult (FloorRequestService service) =>
     {
       // Get all internal floor requests
-      await context.Response.WriteAsJsonAsync(new { Message = "All internal floor requests" });
+      var requests = service.GetInternalRequests();
+      return TypedResults.Ok(requests);
     });
 
-    group.MapGet("/next", async context =>
+    group.MapGet("/next", IResult (FloorRequestService service) =>
     {
       // Get the next floor to service
-      // Note: This should also remove the current floor being serviced from the request list
-      await context.Response.WriteAsJsonAsync(new { Message = "Next floor to service" });
+      var nextStop = service.GetNextStop();
+      return nextStop is not null
+        ? TypedResults.Ok(nextStop)
+        : TypedResults.NotFound();
     });
 
-    group.MapPost("/", async context =>
+    group.MapPost("/", IResult (FloorRequestService service, FloorRequest request, IOptions<ElevatorOptions> options) =>
     {
+      var config = options.Value;
+
+      // Validate floor range from configuration, allows for custom floor range.
+      if (request.Floor < config.MinFloor || request.Floor > config.MaxFloor)
+      {
+        var errors = new Dictionary<string, string[]>
+        {
+          ["Floor"] = [$"Floor must be between {config.MinFloor} and {config.MaxFloor}"]
+        };
+        return TypedResults.ValidationProblem(errors);
+      }
+      // Future validations can be added here
+
       // Create a new floor request
-      await context.Response.WriteAsJsonAsync(new { Message = "New floor request created" });
+      service.AddRequest(request);
+      return TypedResults.Created($"/floorrequests/{request.Floor}", request);
     });
 
-    group.MapDelete("/{id}", async context =>
+    group.MapDelete("/{floor}", IResult (FloorRequestService service, int floor) =>
     {
-      // Delete a floor request by ID / Floor Number
-      var id = context.Request.RouteValues["id"];
-      await context.Response.WriteAsJsonAsync(new { Message = $"Floor request {id} deleted" });
+      // Delete a floor request Floor Number
+      var success = service.RemoveRequest(floor);
+      return success
+        ? TypedResults.NoContent()
+        : TypedResults.NotFound();
     });
 
-    group.MapPost("/clear", async context =>
+    group.MapPost("/clear", IResult (FloorRequestService service) =>
     {
       // Clear all floor requests
-      await context.Response.WriteAsJsonAsync(new { Message = "All floor requests cleared" });
+      service.ClearAllRequests();
+      return TypedResults.NoContent();
+    });
+
+    group.MapPost("/servicecurrentfloor", IResult (FloorRequestService service) =>
+    {
+      // Service the current floor. Should be called when the elevator arrives at a floor.
+      service.ServiceCurrentFloor();
+      return TypedResults.NoContent();
     });
   }
 }
