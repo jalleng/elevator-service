@@ -13,14 +13,16 @@ public static class FloorRequestEndpoints
       // Get all floor requests
       var requests = service.GetAllRequests();
       return TypedResults.Ok(requests);
-    });
+    })
+    .Produces<IEnumerable<FloorRequest>>(200);
 
     group.MapGet("/internal", IResult (FloorRequestService service) =>
     {
       // Get all internal floor requests
       var requests = service.GetInternalRequests();
       return TypedResults.Ok(requests);
-    });
+    })
+    .Produces<IEnumerable<FloorRequest>>(200);
 
     group.MapGet("/next", IResult (FloorRequestService service) =>
     {
@@ -29,7 +31,9 @@ public static class FloorRequestEndpoints
       return nextStop is not null
         ? TypedResults.Ok(nextStop)
         : TypedResults.NotFound();
-    });
+    })
+    .Produces<FloorRequest>(200)
+    .Produces(404);
 
     group.MapPost("/", IResult (FloorRequestService service, FloorRequest request, IOptions<ElevatorOptions> options) =>
     {
@@ -49,7 +53,9 @@ public static class FloorRequestEndpoints
       // Create a new floor request
       service.AddRequest(request);
       return TypedResults.Created($"/floorrequests/{request.Floor}", request);
-    });
+    })
+    .Produces<FloorRequest>(201)
+    .ProducesValidationProblem(400);
 
     group.MapDelete("/{floor}", IResult (FloorRequestService service, int floor) =>
     {
@@ -58,20 +64,24 @@ public static class FloorRequestEndpoints
       return success
         ? TypedResults.NoContent()
         : TypedResults.NotFound();
-    });
+    })
+    .Produces(204)
+    .Produces(404);
 
     group.MapPost("/clear", IResult (FloorRequestService service) =>
     {
       // Clear all floor requests
       service.ClearAllRequests();
       return TypedResults.NoContent();
-    });
+    })
+    .Produces(204);
 
     group.MapPost("/servicecurrentfloor", IResult (FloorRequestService service) =>
     {
       // Service the current floor. Should be called when the elevator arrives at a floor.
       service.ServiceCurrentFloor();
       return TypedResults.NoContent();
-    });
+    })
+    .Produces(204);
   }
 }
