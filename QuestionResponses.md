@@ -91,7 +91,43 @@ When you build, you are creating a "Legacy" system the moment the code is merged
 
 **Answer:**
 
-[Your answer here]
+A serverless architecture is similar to and often considered a subset of PAAS architecture. With a serverless architecture the focus shifts from managing servers to managing events and state.
+
+### Foundational Elements
+
+Event Driven Design: Serverless Functions are short lived. They are waiting to be triggered. At which point they "wake up". You define the event that triggers the execution. For example the following events could be used to trigger the function.
+
+- HTTP Requests: via API Gateways.
+
+- File Uploads: (e.g., an image landing in an S3 bucket).
+
+- Database Changes: (e.g., a new row in DynamoDB).
+
+- Scheduled Events: (Cron jobs).
+
+Function as a service(FAAS):
+This is the logic layer. Functions should be single-purpose. If a function is doing too many things, it becomes harder to scale and debug.
+
+Backend as a service(BAAS):
+Since functions are stateless, you rely on external services for everything else:
+
+- Storage: S3 or Google Cloud Storage.
+
+- Databases: NoSQL options like DynamoDB or CosmosDB are preferred for their ability to handle rapid scaling.
+
+- Authentication: Managed services like Auth0 or AWS Cognito.
+
+### Considerations
+
+Stateless: Serverless functions live in isolation. They don't have visibility to data from a previous request. Any data that needs to persist has to be managed seperatley. Either in an external database or cache.
+
+Cold Starts: Serverless functions that have not been called for a while will be spun-down by the cloud service provider. This means that if a function in a spun-down state is called the request will experience a delay while the environment initializes.
+
+Security: With traditional architecture security is generally managed with tools on the network layer. Like firewalls. An authenticated user who has authoriziation to log into the system often has access to several resources. With a serverless architecture each function has it's own permissions. It is managed through Identity Access Management(IAM). So an individual function only has the exact permissions it needs to accomplish it's task. Combining the Single Responsibility Principal with the Principal of Least Privilege allows for greater security. For example a function that reads from a DB only has permission to read. This function does not have permission to edit or delete. So a hacker hacking a read endpoint would not also have access to a write endpoint. In addition to this due to the short life of a serverless function a hacker can not hack an endpoint and then expect maliscious software to persist.
+
+Observability: Serverless architecture is a distributed system. Which makes it less straightforward for traditional logging and debuggin approaches. Distributed tracing tools are available to help follow the path of an event.
+
+Vendor Lock-in: Switching between providers for a serverless system can be non-trivial. Different serverless providers rely on their own specific API's. So switching providers can require significant changes to the application architecture.
 
 ---
 
