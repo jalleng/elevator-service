@@ -33,7 +33,55 @@ Example: Microsoft 365, Amazon Connect, SalesForce
 
 **Answer:**
 
-[Your answer here]
+### 1. Core Competency
+
+**Is this software what makes our product unique?**
+
+- **Build:** If the software provides a competitive advantage you should own the IP.
+
+- **Buy:** If the software is a "commodity" (e.g., Email, Payroll, or Identity Management), you should buy it.
+
+---
+
+### 2. Total Cost of Ownership (TCO)
+
+This includes ongoing maintenance for the life of the product not just the initial build costs.
+
+- **Build TCO:** Includes developer salaries, QA, DevOps, security patching, bug fixes, and the loss of historical context if the lead engineer leaves. You are assuming a permanent liability.
+
+- **Buy TCO:** Includes licensing fees, integration costs, and potential "Seat" or "Usage" taxes. This is usually a predictable operational expense (OpEx).
+
+---
+
+### 3. Time to Market (TTM)
+
+In a competitive landscape, speed is often more valuable than perfection.
+
+- **Buy:** You can have a SaaS solution configured and integrated in days.
+
+- **Build:** Even with a fast team, a production-ready system requires a full lifecycle (Design $\rightarrow$ Dev $\rightarrow$ Test $\rightarrow$ Deploy). If your competitors are moving faster, building might be a luxury you can't afford.
+
+---
+
+### 4. The "Feature Gap" and Customization
+
+Buy solutions rarely match exactly everything you are looking for.
+
+- **The 80/20 Rule:** If a commercial product meets 80% of your needs, can you adapt your business process to fit the remaining 20%?
+
+- **Vendor Lock-in:** If you buy, you are at the mercy of the vendor's roadmap. If they decide to deprecate a feature you rely on, you have zero recourse.
+
+- **Build:** You have 100% control, but you are responsible for building every feature (like password resets or audit logs) that came with the "Buy" version.
+
+---
+
+### 5. Maintenance and "Technical Debt"
+
+When you build, you are creating a "Legacy" system the moment the code is merged.
+
+- **Maintenance:** Industry standard suggests that 70% of software costs occur after the initial launch. If you build, your team's future capacity is eaten up by maintaining the old code rather than building new features.
+
+- **Buy:** The vendor handles the technical debt. They update the runtimes, fix the security holes, and ensure it works with the latest browsers/OS versions.
 
 ---
 
