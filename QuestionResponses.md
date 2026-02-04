@@ -137,7 +137,9 @@ Vendor Lock-in: Switching between providers for a serverless system can be non-t
 
 **Answer:**
 
-[Your answer here]
+Inheritance is the pattern of building a Parent class and including all of the properties that children of that class might need. Each child of the parent class derives all of their properties and behavior from the parent class. Wether they actually apply to the child class or not. This can lead to undesireable behavior. Like the need to override props and behavior that do not work or apply to the child class. It also makes the Parent/Base class extremely fragile because any change to the parent class could potentially break a child class. It can also lead to confusing deeply nested hierarchies.
+
+Composition is the pattern of building a base class and then 'composing' a more complex object by plugging in smaller components. These smaller components can define different properties and behaviors that apply to different types of child objects. This allows the components to be more loosely coupled, flexible, and testable.
 
 ---
 
