@@ -149,4 +149,16 @@ Composition is the pattern of building a base class and then 'composing' a more 
 
 **Answer:**
 
-[Your answer here]
+I was building a "bridge" between a legacy system and a new system. The goal of this bridge was to keep data moving from the legacy system which was the source of truth to the new system. Data also needed to flow from the new system back to the legacy system to update the source of truth. This was part of a microservice architecture.
+
+For data moving from the new system to the legacy system. Due to security and functional contraints the data needed to follow a fire and forget paradigm. So the new system did not care if the data actually made it all of the way to the legacy system. I built this using a backend that recieved http requests and routed traffic to the appropriate microservice. The microservices were identical but there were multiple microservices because each microservice was connected to a specific region/database for the customer. In hindsight I decided that for this behavior a kafka queing approach would have been a better option than an api recieving http requests. It would have simplified the architecture and made it easier to maintain.
+
+For traffic flowing from the legacy system to the new system I needed data available in the microservice that would be updated from the legacy side and readable from the new side. This was data that would populate options in a UI in the new system. So it needed to be updated from the source of truth in legacy and available in the new system. Some of the constraints were:
+It needed to be accurate and up to date.
+It needed to be accesible quickly and repeatedly. Think of a person opening and closing a dropdown.
+It needed to not directly query the legacy system because this could not be allowed to put any load on the legacy system.
+It needed to be filterable by several parameters.
+
+I chose to use a Redis cacheing approach because it fit well with the constraints.
+
+Later after implementing the cacheing approach the customer decided to go in a slightly different direction which necessitated having more information in the microservice. As complexity grew and we implemented Postgres to manage larger and more numerous data records, it became obvious that a relational approach would have worked better overall than the initial Redis implementation.
